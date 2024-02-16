@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 // scrape UW Food Services daily menu and send it to a Discord webhook
 // the documented API online doesn't seem to be working, so we're scraping the website
