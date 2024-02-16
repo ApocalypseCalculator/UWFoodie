@@ -33,23 +33,29 @@ axios.get(`https://uwaterloo.ca/food-services/locations-and-hours/daily-menu?fie
     }
 
     const $ = cheerio.load(response.data);
-    $('.paragraphs-items-field-uw-fs-daily-menu > div > .field-items > .field-item').each((i, el) => {
-        let location = {};
 
-        const scnd = cheerio.load($(el).toString());
-        location.name = scnd('.dm-location').first().text().trim();
-        location.value = '';
+    if ($('.view-empty').length > 0) {
+        data.embeds[0].description = "No menu available for today";
+    }
+    else {
+        $('.paragraphs-items-field-uw-fs-daily-menu > div > .field-items > .field-item').each((i, el) => {
+            let location = {};
 
+            const scnd = cheerio.load($(el).toString());
+            
+            location.name = scnd('.dm-location').first().text().trim();
+            location.value = '';
 
-        scnd('li[class="dm-menu-item"] > span').each((j, el2) => {
-            el2.children.map((c) => {
-                if (c.name === 'a') {
-                    location.value += `[${scnd(c).text().trim()}](https://uwaterloo.ca${c.attribs.href})\n`;
-                }
+            scnd('li[class="dm-menu-item"] > span').each((j, el2) => {
+                el2.children.map((c) => {
+                    if (c.name === 'a') {
+                        location.value += `[${scnd(c).text().trim()}](https://uwaterloo.ca${c.attribs.href})\n`;
+                    }
+                });
             });
+            data.embeds[0].fields.push(location);
         });
-        data.embeds[0].fields.push(location);
-    });
+    }
 
     axios.post(config.webhook, data, {
         headers: {
